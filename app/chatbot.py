@@ -53,23 +53,11 @@ def calculate_cost_and_metrics(usage, model_id, model_dict):
     completion_cost = completion_tokens * c_rate
     total_cost = prompt_cost + completion_cost
 
-    # Extract optional details like reasoning tokens (for models like Qwen or GPT-OSS)
-    reasoning_tokens = 0
-    if hasattr(usage, "completion_tokens_details") and usage.completion_tokens_details:
-        reasoning_tokens = getattr(
-            usage.completion_tokens_details, "reasoning_tokens", 0
-        )
-
     # Format the metrics breakdown string
     analysis_lines = [
         f"**Model:** `{model_id}`",
         f"**Tokens Used:** {total_tokens:,} ({prompt_tokens:,} prompt + {completion_tokens:,} completion)",
     ]
-
-    if reasoning_tokens > 0:
-        analysis_lines.append(
-            f"**Reasoning Tokens:** {reasoning_tokens:,} included in completion"
-        )
 
     if hasattr(usage, "total_time") and usage.total_time:
         analysis_lines.append(f"**Latency:** {usage.total_time:.2f}s")

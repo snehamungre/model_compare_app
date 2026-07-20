@@ -1,12 +1,10 @@
-from pyexpat import model
 from statistics import mode
 import time
 import os
-import requests
 from groq import Groq
 import streamlit as st
 from dotenv import load_dotenv
-from chatbot import get_models
+from chatbot import calculate_cost_and_metrics, get_models
 
 # get the API key and access the client
 load_dotenv()
@@ -21,7 +19,7 @@ st.title("Model Compare Bot")
 # get the models avalible
 model_ids, model_dict = get_models(api_key)
 option = st.selectbox("Which number do you like best?", model_ids)
-useage = []
+
 
 # Streamed response emulator
 def response_generator(prompt):
@@ -38,7 +36,7 @@ def response_generator(prompt):
         yield word + " "
         time.sleep(0.08)
 
-    print(response.usage)
+    st.session_state["latest_usage"] = response.usage
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -64,8 +62,9 @@ if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "assistant", "content": response})
 
     # Display prompt analysis in chat message container
+    usage = st.session_state.get("latest_usage")
     with st.chat_message("system", avatar="⚙️", width="stretch"):
-        analysis = f"model: {option}"
+        analysis = calculate_cost_and_metrics(usage, option, model_dict)
         st.write(analysis)
 
     st.session_state.messages.append({"role": "system", "content": analysis})
