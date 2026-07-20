@@ -1,32 +1,32 @@
 # 🤖 Groq AI Model Comparator & Chatbot
 
-An interactive Streamlit web application that lets you chat with various AI models powered by the Groq API while analyzing real-time metrics—including token consumption, generation speed ($\text{tokens/sec}$), latency, and per-prompt inference costs.
+An interactive Streamlit application that allows you to chat with various AI models powered by the Groq API while tracking real-time performance metrics—including token consumption, latency, and estimated request costs. Every prompt's analytics are automatically aggregated into a clean session summary table.
 
 ---
 
 ## ✨ Features
 
-* **Multi-Model Selector:** Easily switch between all available Groq models (Llama, GPT-OSS, Qwen, Orpheus, etc.).
-* **Dynamic API & Cache Management:** Automatically fetches available models and pricing metadata from Groq with local caching (`st.cache_data`) to prevent redundant API calls.
-* **Real-Time Output Streaming:** Responses stream smoothly using `st.write_stream` and Groq's native streaming endpoint.
-* **In-Depth Cost & Usage Analysis:**
-  * Prompt vs. completion token breakdown.
-  * Real-time generation speed ($\text{tokens/sec}$).
-  * Total latency ($\text{seconds}$).
-  * Exact cost calculation per request based on live token rates.
-  * Cumulative session spending tracker.
+* **Multi-Model Support:** Easily switch between all available Groq models (Llama 3, GPT-OSS, Qwen, etc.) via the sidebar.
+* **System Prompt Customization:** Test system prompt adherence directly within the chat interface.
+* **Real-Time Streaming:** Smooth response generation powered by Groq's low-latency inference engine and Streamlit's `write_stream`.
+* **Automatic Price & Metric Calculations:**
+  * Displays prompt tokens, completion tokens, and total usage per message.
+  * Measures execution latency (seconds).
+  * Calculates exact USD costs dynamically based on model pricing metadata.
+* **Session Analytics Summary Table:** Automatically appends metrics for every interaction into an aggregated, index-free Pandas DataFrame displayed underneath the chat.
+* **API Response Caching:** Uses `@lru_cache` to fetch Groq model lists and pricing without redundant network calls.
+
 
 ---
 
-## 🛠️ Project Structure
+## 📁 Project Structure
 
 ```text
 AI_model_compare_app/
 ├── app/
 │   ├── main.py          # Streamlit UI & chat loop
-│   └── chatbot.py       # Groq API model fetching & caching logic
-├── .env                 # Environment variables (API Key)
-├── .gitignore           # Git ignore file
+│   └── models.py       # Groq API model fetching & analytics calculation
+├── .env                 # API Key configuration
 ├── requirements.txt     # Python dependencies
 └── README.md            # Project documentation
 ```
@@ -37,8 +37,8 @@ AI_model_compare_app/
 
 ### Prerequisites
 
-* Python 3.10 or higher installed.
-* A **Groq API key** (obtainable from [Groq Console](https://console.groq.com/)).
+* Python 3.10 or higher.
+* A **Groq API key** (available from the [Groq Console](https://console.groq.com/)).
 
 ### 1. Clone the Repository
 
@@ -79,12 +79,19 @@ GROQ_API_KEY=your_groq_api_key_here
 streamlit run app/main.py
 ```
 
-Open your browser to `http://localhost:8501` to view the app.
+Open your browser at `http://localhost:8501`.
 
 ---
 
-## 📊 Analytics Calculated
+## 📊 Session Analytics Tracking
 
-* **Token Breakdown:** `Total Tokens = Prompt Tokens + Completion Tokens`
-* **Generation Speed:** $\text{TPS} = \frac{\text{Completion Tokens}}{\text{Completion Time (seconds)}}$
-* **Request Cost:** $\text{Cost} = (\text{Prompt Tokens} \times \text{Prompt Rate}) + (\text{Completion Tokens} \times \text{Completion Rate})$
+Each request records the following attributes into the summary DataFrame:
+
+| Column | Description |
+| :--- | :--- |
+| **Model** | Selected Groq model ID |
+| **Prompt Tokens** | Input tokens consumed |
+| **Completion Tokens** | Output tokens generated |
+| **Total Tokens** | Total request token count |
+| **Latency (s)** | Time to complete generation |
+| **Cost ($)** | Estimated cost based on per-token pricing |
