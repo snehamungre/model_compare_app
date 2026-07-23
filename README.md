@@ -15,7 +15,34 @@ An interactive Streamlit application that allows you to chat with various AI mod
   * Calculates exact USD costs dynamically based on model pricing metadata.
 * **Session Analytics Summary Table:** Automatically appends metrics for every interaction into an aggregated, index-free Pandas DataFrame displayed underneath the chat.
 * **API Response Caching:** Uses `@lru_cache` to fetch Groq model lists and pricing without redundant network calls.
+---
+## 🧪 Ragas Model Evaluation & Benchmarking
 
+The application includes an automated evaluation pipeline powered by **[Ragas](https://docs.ragas.io/)** that benchmarks model performance across multiple standardized evaluation frameworks using Groq as an LLM judge.
+
+### 📌 Supported Metric Suites
+
+| Category | Metric | Description |
+| :--- | :--- | :--- |
+| **General Purpose** | **Aspect Critic (Conciseness)** | Assesses if the response is direct, concise, and free of unnecessary filler text. |
+| | **Simple Criteria Score** | Evaluates overall clarity and readability against natural language criteria. |
+| **RAG Quality** | **Factual Correctness** | Measures factual agreement between generated responses and ground truth references. |
+| | **Response Relevancy** | Quantifies how directly the answer addresses the user's initial query. |
+| | **Context Recall** | Checks whether all relevant ground-truth facts were successfully retrieved. |
+| **Nvidia Metrics** | **Answer Accuracy** | Scores exact correctness against reference ground truth. |
+| | **Context Relevance** | Evaluates if retrieved context passages directly answer the prompt. |
+| | **Response Groundedness** | Ensures answer claims are strictly grounded within provided reference context. |
+
+---
+
+### 🚀 How It Works
+
+1. **Model Selection**: Choose any Groq-hosted model (e.g., `llama-3.3-70b-versatile`, `mixtral-8x7b-32768`) from the sidebar.
+2. **Automated Generation & Scoring**: 
+   - Queries the selected model asynchronously for standard benchmark questions.
+   - Evaluates the generated output against predefined ground truth and context using `SingleTurnSample` wrappers.
+   - Leverages `AsyncOpenAI` for concurrent evaluation across all metrics.
+3. **Structured Results**: Displays scores in an interactive summary table directly inside the Streamlit dashboard.
 
 ---
 
@@ -23,12 +50,19 @@ An interactive Streamlit application that allows you to chat with various AI mod
 
 ```text
 AI_model_compare_app/
-├── app/
-│   ├── main.py          # Streamlit UI & chat loop
-│   └── models.py       # Groq API model fetching & analytics calculation
-├── .env                 # API Key configuration
-├── requirements.txt     # Python dependencies
-└── README.md            # Project documentation
+├── backend/
+│   ├── analytics.py        # Token usage, latency & cost calculations
+│   ├── evaluation.py       # Async Ragas & Nvidia evaluation metrics pipeline
+│   └── groq_client.py      # Groq API client initialization & model loader
+│
+├── frontend/
+│   ├── chat_view.py        # Chatbot interface & session analytics summary table
+│   └── eval_view.py        # Benchmark evaluation UI tab
+│
+├── main.py                 # App entrypoint, page config & layout tabs
+├── .env                    # API keys configuration
+├── requirements.txt        # Dependencies (ragas, groq, openai, streamlit, pandas)
+└── README.md               # Project documentation
 ```
 
 ---
