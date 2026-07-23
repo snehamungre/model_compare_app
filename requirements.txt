@@ -1,0 +1,16 @@
+streamlit>=1.30.0
+groq>=0.4.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+pandas
+
+# Evaluation tab (Ragas)
+ragas>=0.2.0
+datasets>=2.19.0
+langchain-groq>=0.2.0
+langchain-huggingface>=0.1.0
+sentence-transformers>=3.0.0
+
+# Token counting (chat sidebar)
+tiktoken>=0.7.0
+transformers>=4.40.0

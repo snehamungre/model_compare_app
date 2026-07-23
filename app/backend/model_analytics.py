@@ -1,39 +1,3 @@
-from functools import lru_cache
-import requests
-
-@lru_cache(maxsize=1)
-def get_models(api_key: str):
-    """Fetch available Groq models and pricing details."""
-
-    url = "https://api.groq.com/openai/v1/models"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-
-    response = requests.get(url, headers=headers)
-    data = response.json()
-
-    model_ids = []
-    model_dict = {}
-
-    # For each model get relevent information
-    for m in data.get("data", []):
-        m_id = m["id"]
-        model_ids.append(m_id)
-
-        pricing = m.get("pricing", {})
-        model_dict[m_id] = {
-            "name": m.get("name"),
-            "context_window": m.get("context_window"),
-            "max_output": m.get("max_completion_tokens"),
-            "prompt_cost_per_token": float(pricing.get("prompt", 0)),
-            "completion_cost_per_token": float(pricing.get("completion", 0)),
-        }
-
-    return model_ids, model_dict
-
-
 # Calculate usage metrics and returns formatted string response
 def calculate_cost_and_metrics(usage, model_id, model_dict):
     if not usage:
@@ -76,3 +40,21 @@ def calculate_cost_and_metrics(usage, model_id, model_dict):
     analysis_lines.append(f"**Estimated Cost:** `${total_cost:.6f}` USD")
 
     return "\n\n".join(analysis_lines), record
+
+
+from openai import OpenAI
+
+
+def generate_model_response(model_id: str, prompt: str) -> str:
+    """Sends a user prompt to the selected Groq model and returns its response text."""
+    client = OpenAI(
+        base_url="https://api.groq.com/openai/v1",
+        api_key=os.environ["GROQ_API_KEY"],
+    )
+
+    completion = client.chat.completions.create(
+        model=model_id,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    return completion.choices[0].message.content
